@@ -19,4 +19,4 @@ jobs:
         run: pip install ruff
 
       - name: Run Ruff
-        run: ruff tests/
+        run: ruff check
