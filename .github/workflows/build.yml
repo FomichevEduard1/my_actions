@@ -45,13 +45,22 @@ jobs:
         run: |
           docker compose version || (sudo curl -SL https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose)
 
-      - name: Start docker-compose stack
+      - name: Start docker compose stack
         run: |
           docker compose -f docker-compose.yml up -d
 
       - name: Wait for services to be healthy
         run: |
           echo "Waiting for services to be healthy..."
-          timeout 30 bash -c 'until [ "$(docker inspect -f {{.State.Health.Status}} postgres-auth)" == "healthy" ] && \
+          timeout 45 bash -c 'until [ "$(docker inspect -f {{.State.Health.Status}} postgres-auth)" == "healthy" ] && \
                                    [ "$(docker inspect -f {{.State.Health.Status}} postgres-university)" == "healthy" ]; do sleep 5; done'
           echo "Postgres containers are healthy"
+
+      - name: Run integration tests
+        run: |
+          docker run --rm \
+            --network host \
+            -v $(pwd):/workspace \
+            -w /workspace \
+            python:3.11-slim \
+            sh -c "pip install -r requirements.txt && python -m pytest tests -v"
