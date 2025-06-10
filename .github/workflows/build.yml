@@ -63,4 +63,4 @@ jobs:
             -v $(pwd):/workspace \
             -w /workspace \
             python:3.11-slim \
-            sh -c "pip install -r requirements.txt && python -m pytest tests -v"
+            sh -c "pip install --only-binary=all --platform linux_x86_64 -r requirements.txt && python -m pytest tests -v"
