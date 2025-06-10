@@ -3,3 +3,4 @@ requests==2.32.3
 curlify==3.0.0
 pydantic==2.11.5
 pydantic[email]>=2.0.0
+faker>=19.0.0
