@@ -2,6 +2,11 @@ name: My CI/CD
 
 on: push
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -31,11 +36,6 @@ jobs:
       AUTH_SERVICE_API_URL: ${{ secrets.AUTH_SERVICE_API_URL }}
       UNIVERSITY_SERVICE_INTERNAL_URL: ${{ secrets.UNIVERSITY_SERVICE_INTERNAL_URL }}
       UNIVERSITY_SERVICE_API_URL: ${{ secrets.UNIVERSITY_SERVICE_API_URL }}
-
-    services:
-      docker:
-        image: docker:24.0.5-dind
-        options: --privileged
 
     steps:
       - name: Checkout repository
