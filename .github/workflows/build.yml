@@ -28,6 +28,7 @@ jobs:
 
       - name: Run Ruff
         run: ruff check tests/test_grade_contract.py
+
   integration:
     runs-on: ubuntu-latest
     env:
