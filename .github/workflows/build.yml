@@ -19,4 +19,39 @@ jobs:
         run: pip install ruff
 
       - name: Run Ruff
-        run: ruff check
+        run: ruff check tests/test_grade_contract.py
+  integration:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB_AUTH: ${{ secrets.POSTGRES_DB_AUTH }}
+      POSTGRES_DB_UNIVERSITY: ${{ secrets.POSTGRES_DB_UNIVERSITY }}
+      AUTH_SERVICE_INTERNAL_URL: ${{ secrets.AUTH_SERVICE_INTERNAL_URL }}
+      AUTH_SERVICE_API_URL: ${{ secrets.AUTH_SERVICE_API_URL }}
+      UNIVERSITY_SERVICE_INTERNAL_URL: ${{ secrets.UNIVERSITY_SERVICE_INTERNAL_URL }}
+      UNIVERSITY_SERVICE_API_URL: ${{ secrets.UNIVERSITY_SERVICE_API_URL }}
+
+    services:
+      docker:
+        image: docker:24.0.5-dind
+        options: --privileged
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          docker compose version || sudo curl -SL https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose && sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Start docker-compose stack
+        run: |
+          docker-compose -f docker-compose.yml up -d
+
+      - name: Wait for services to be healthy
+        run: |
+          echo "Waiting for services to be healthy..."
+          timeout 30 bash -c 'until [ "$(docker inspect -f {{.State.Health.Status}} postgres-auth)" == "healthy" ] && \
+                                   [ "$(docker inspect -f {{.State.Health.Status}} postgres-university)" == "healthy" ]; do sleep 5; done'
+          echo "Postgres containers are healthy"
