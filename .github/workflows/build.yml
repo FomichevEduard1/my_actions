@@ -56,14 +56,15 @@ jobs:
         with:
           container: postgres-auth
           wait-time: 45
-          interval: 5
+          require-healthy: true
+
 
       - name: Wait for postgres-university
         uses: stringbean/docker-healthcheck-action@v1
         with:
           container: postgres-university
           wait-time: 45
-          interval: 5
+          require-healthy: true
 
       - name: Run integration tests
         continue-on-error: true
